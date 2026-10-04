@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
-import { StockDataPoint } from "../types";
+import type { StockDataPoint } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+const getClient = () => new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
 
 export const getMarketAnalysis = async (data: StockDataPoint[], symbol: string): Promise<string> => {
   try {
@@ -10,8 +10,8 @@ export const getMarketAnalysis = async (data: StockDataPoint[], symbol: string):
     Data: ${JSON.stringify(recentData)}
     Provide a concise 2-3 sentence summary of the current trend, mentioning volatility and RSI indicators. No markdown formatting.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+    const response = await getClient().models.generateContent({
+      model: 'gemini-3.8-flash',
       contents: prompt,
     });
     return response.text || "Analysis unavailable.";
@@ -25,8 +25,8 @@ export const getArchitectureExplanation = async (component: string): Promise<str
   try {
     const prompt = `Explain the role of "${component}" in a modern Azure Data Engineering pipeline using Medallion Architecture and Databricks. Keep it under 50 words.`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+    const response = await getClient().models.generateContent({
+      model: 'gemini-3.8-flash',
       contents: prompt,
     });
     return response.text || "Explanation unavailable.";

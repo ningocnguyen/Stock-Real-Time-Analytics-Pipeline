@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Terminal, Copy, Check } from 'lucide-react';
-import { CodeSnippet } from '../types';
+import type { CodeSnippet } from '../types';
 
 const SNIPPETS: CodeSnippet[] = [
   {
@@ -32,7 +32,7 @@ public sealed class StockTick
     title: 'Databricks Silver Layer (PySpark)',
     language: 'python',
     description: 'Structured Streaming sliding window metrics (RSI + volatility) with watermarking and Delta append writes.',
-    code: `parsed_ticks = raw_stream
+    code: String.raw`parsed_ticks = raw_stream
     .select(from_json(col("body").cast("string"), stock_schema).alias("tick"))
     .select("tick.*")
     .withWatermark("timestamp", "10 minutes")
@@ -58,11 +58,36 @@ silver_with_indicators.writeStream \
 const CodeShowcase: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [copyError, setCopyError] = useState('');
+  const copyRequest = useRef(0);
+  const copyTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(SNIPPETS[activeTab].code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  useEffect(() => {
+    setCopied(false);
+    setCopyError('');
+    return () => {
+      copyRequest.current += 1;
+      if (copyTimeout.current !== null) clearTimeout(copyTimeout.current);
+    };
+  }, [activeTab]);
+
+  const handleCopy = async () => {
+    const request = ++copyRequest.current;
+    if (copyTimeout.current !== null) clearTimeout(copyTimeout.current);
+    setCopied(false);
+    setCopyError('');
+    try {
+      await navigator.clipboard.writeText(SNIPPETS[activeTab].code);
+      if (request !== copyRequest.current) return;
+      setCopied(true);
+      copyTimeout.current = setTimeout(() => {
+        setCopied(false);
+        copyTimeout.current = null;
+      }, 2000);
+    } catch {
+      if (request !== copyRequest.current) return;
+      setCopyError('Unable to copy. Select the code and copy it manually.');
+    }
   };
 
   return (
@@ -75,7 +100,9 @@ const CodeShowcase: React.FC = () => {
         <div className="flex space-x-1 bg-gray-900 rounded-lg p-1">
             {SNIPPETS.map((snippet, idx) => (
                 <button
+                    type="button"
                     key={idx}
+                    aria-pressed={activeTab === idx}
                     onClick={() => setActiveTab(idx)}
                     className={`px-3 py-1 text-xs rounded-md transition-all ${activeTab === idx ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-400 hover:text-white'}`}
                 >
@@ -93,8 +120,10 @@ const CodeShowcase: React.FC = () => {
 
         <div className="relative flex-1 bg-gray-950 rounded-lg border border-gray-800 overflow-hidden group">
              <button
+                type="button"
                 onClick={handleCopy}
-                className="absolute top-2 right-2 p-2 bg-gray-800 rounded-md text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                aria-label={copied ? 'Code copied' : 'Copy code'}
+                className="absolute top-2 right-2 p-2 bg-gray-800 rounded-md text-gray-400 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 transition-opacity z-10"
              >
                 {copied ? <Check size={16} className="text-green-500"/> : <Copy size={16}/>}
              </button>
@@ -104,6 +133,9 @@ const CodeShowcase: React.FC = () => {
                 </pre>
              </div>
         </div>
+        <p role="status" className="text-sm text-gray-400 mt-2">
+          {copyError || (copied ? 'Code copied to clipboard.' : '')}
+        </p>
       </div>
     </div>
   );
