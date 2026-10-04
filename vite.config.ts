@@ -1,6 +1,6 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-import { handleAiRequest } from './server/ai';
+import { handleAiRequest } from './api/ai';
 
 export default defineConfig(({ mode }) => ({
   plugins: [
