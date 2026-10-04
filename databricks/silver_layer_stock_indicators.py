@@ -4,8 +4,9 @@ from pyspark.sql.types import StructField, StructType, StringType, DoubleType, L
 
 # COMMAND ----------
 # Configure Event Hubs connector (replace placeholders with real values/secret scopes).
+connection_string = dbutils.secrets.get("kv-scope", "event-hub-connection-string")
 ehConf = {
-    "eventhubs.connectionString": dbutils.secrets.get("kv-scope", "event-hub-connection-string"),
+    "eventhubs.connectionString": sc._jvm.org.apache.spark.eventhubs.EventHubsUtils.encrypt(connection_string),
     "eventhubs.consumerGroup": "$Default",
 }
 

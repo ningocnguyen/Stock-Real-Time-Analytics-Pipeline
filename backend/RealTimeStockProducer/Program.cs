@@ -29,6 +29,7 @@ using var loggerFactory = LoggerFactory.Create(logging =>
 });
 
 var logger = loggerFactory.CreateLogger("RealTimeStockProducer");
+var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
 
 using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(settings.HttpTimeoutSeconds) };
 
@@ -58,7 +59,7 @@ var tickStream = Observable.Interval(TimeSpan.FromMilliseconds(1000d / settings.
 var senderSubscription = tickStream
     .Buffer(TimeSpan.FromMilliseconds(100), 50)
     .Where(batch => batch.Count > 0)
-    .SelectMany(batch => Observable.FromAsync(ct => SendBatchAsync(eventHubProducer, batch, logger, ct)))
+    .SelectMany(batch => Observable.FromAsync(ct => SendBatchAsync(eventHubProducer, batch, logger, jsonOptions, ct)))
     .Subscribe(
         onNext: _ => { },
         onError: ex =>
@@ -167,6 +168,7 @@ static async Task SendBatchAsync(
     EventHubProducerClient producerClient,
     IReadOnlyCollection<StockTick> batch,
     ILogger logger,
+    JsonSerializerOptions jsonOptions,
     CancellationToken cancellationToken)
 {
     try
@@ -175,7 +177,7 @@ static async Task SendBatchAsync(
 
         foreach (var tick in batch)
         {
-            var payload = JsonSerializer.SerializeToUtf8Bytes(tick);
+            var payload = JsonSerializer.SerializeToUtf8Bytes(tick, jsonOptions);
             if (!eventBatch.TryAdd(new EventData(payload)))
             {
                 logger.LogWarning("Batch reached capacity after {Count} events. Sending partial batch.", eventBatch.Count);
