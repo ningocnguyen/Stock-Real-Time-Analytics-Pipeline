@@ -1,0 +1,5 @@
+{
+  "name": "Azure Stream Analytics Showcase",
+  "description": "A comprehensive dashboard demonstrating a Real-Time Stock Analysis Pipeline using Azure, Databricks, and Medallion Architecture. Features simulated live data streaming, architecture visualization, and AI-powered market insights.",
+  "requestFramePermissions": []
+}
