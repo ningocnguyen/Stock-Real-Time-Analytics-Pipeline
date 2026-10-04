@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 .env
+.vercel/
 **/bin/
 **/obj/
 __pycache__/

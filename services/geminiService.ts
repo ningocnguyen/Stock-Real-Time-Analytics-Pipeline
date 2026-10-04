@@ -1,37 +1,31 @@
-import { GoogleGenAI } from "@google/genai";
-import type { StockDataPoint } from "../types";
+import type { StockDataPoint } from '../types';
 
-const getClient = () => new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
+async function requestInsight(payload: Record<string, unknown>): Promise<string> {
+  const response = await fetch('/api/ai', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) throw new Error(`AI request failed: ${response.status}`);
+  const result: { text?: string } = await response.json();
+  return result.text || 'Response unavailable.';
+}
 
 export const getMarketAnalysis = async (data: StockDataPoint[], symbol: string): Promise<string> => {
   try {
-    const recentData = data.slice(-10);
-    const prompt = `Act as a senior financial analyst. Analyze the following recent stock market data points (simulated) for ${symbol}.
-    Data: ${JSON.stringify(recentData)}
-    Provide a concise 2-3 sentence summary of the current trend, mentioning volatility and RSI indicators. No markdown formatting.`;
-
-    const response = await getClient().models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-    });
-    return response.text || "Analysis unavailable.";
+    return await requestInsight({ type: 'market', data: data.slice(-10), symbol });
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    return "AI Analysis service is temporarily unavailable.";
+    console.error('Gemini API Error:', error);
+    return 'AI Analysis service is temporarily unavailable.';
   }
 };
 
 export const getArchitectureExplanation = async (component: string): Promise<string> => {
   try {
-    const prompt = `Explain the role of "${component}" in a modern Azure Data Engineering pipeline using Medallion Architecture and Databricks. Keep it under 50 words.`;
-
-    const response = await getClient().models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: prompt,
-    });
-    return response.text || "Explanation unavailable.";
+    return await requestInsight({ type: 'architecture', component });
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    return "Info service unavailable.";
+    console.error('Gemini API Error:', error);
+    return 'Info service unavailable.';
   }
 };

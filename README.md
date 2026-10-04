@@ -54,7 +54,16 @@ Built on the industry-standard **Medallion Architecture**, this pipeline manages
 
 Requires Node.js and npm. Run `npm ci` and then `npm run dev`. Open the local address printed by Vite. The dashboard simulates streaming prices; it does not read the Event Hubs or Delta tables created by the backend.
 
-For AI explanations, copy `.env.example` to `.env` and set `VITE_API_KEY` to a [Google AI Studio](https://aistudio.google.com/) key. The simulation runs without a key; AI requests return an unavailable message. Vite exposes `VITE_` variables to browser code, so use a restricted demo key rather than a private production credential.
+For AI explanations, copy `.env.example` to `.env` and set `GEMINI_API_KEY` to a [Google AI Studio](https://aistudio.google.com/) key. The simulation runs without a key; AI requests return an unavailable message. The local Vite server handles `/api/ai`, so the key stays on the server and is not bundled into browser code.
+
+## Deploy the dashboard on Vercel
+
+1. Commit and push this project to your GitHub repository. The `.env` file is ignored and must stay out of Git.
+2. In Vercel, create a new project and import that GitHub repository. Choose the Vite framework preset, leave the root directory as the repository root, use `npm run build` as the build command, and `dist` as the output directory.
+3. In the Vercel project's Environment Variables settings, add `GEMINI_API_KEY` with your Gemini key for Production (and Preview if you want AI features in previews). Do not add a `VITE_` prefix.
+4. Deploy, then open the Vercel URL and test **Start Stream**, **AI Insight**, and the architecture explanations. If you add or change the key after deployment, redeploy for the new setting to take effect.
+
+The deployed dashboard uses simulated stock data. The `/api/ai` Vercel Function handles Gemini requests; it does not deploy or connect the .NET producer and Databricks pipeline. Because this endpoint is public, set appropriate API quotas and monitor usage before sharing the site widely.
 
 ## Run the producer
 
