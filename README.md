@@ -8,7 +8,7 @@ This project is a high-performance **End-to-End Data Engineering** showcase. It 
 ## 🚀 System Architecture
 Built on the industry-standard **Medallion Architecture**, this pipeline manages the complete lifecycle of financial data:
 
-* **Ingestion (Bronze Layer):** A high-throughput **C# / .NET 8** Producer ingests live market data from **Alpha Vantage APIs** and streams it into **Azure Event Hubs** at 1,000+ msgs/sec.
+* **Ingestion (Bronze Layer):** A **C# / .NET 8** producer polls **Alpha Vantage** and sends stock ticks to **Azure Event Hubs**. Its configured target is 120 messages/sec, with synthetic fallback ticks when quotes are unavailable.
 * **Processing (Silver Layer):** **Spark Structured Streaming (PySpark)** on **Databricks** executes complex sliding-window aggregations (5min window / 1min slide) to compute real-time **RSI** and **Volatility** metrics.
 * **Storage (Gold Layer):** Refined, business-ready data is persisted into **ACID-compliant Delta Lake** tables, ensuring total data integrity for historical analysis and downstream consumption.
 
@@ -25,7 +25,7 @@ Built on the industry-standard **Medallion Architecture**, this pipeline manages
 * **Interactive Architecture:** A clickable system diagram powered by **Gemini AI** that explains technical cloud components on-demand.
 
 ### 3. AI Market Analyst
-* **LLM Integration:** Built-in **Google Gemini 3 Flash** acts as a virtual "Senior Financial Analyst".
+* **LLM Integration:** Built-in **Google Gemini 3.8 Flash** acts as a virtual "Senior Financial Analyst".
 * **Context-Aware Insights:** Automatically parses live price action, RSI trends, and volatility to generate natural language market reports.
 
 ---
@@ -50,13 +50,22 @@ Built on the industry-standard **Medallion Architecture**, this pipeline manages
 
 ---
 
-## 📝 Setup & API Usage
-To enable the **AI Market Analyst** and interactive explanations, a Google Gemini API Key is required:
+## Run the dashboard
 
-1.  Obtain a free key from [Google AI Studio](https://aistudio.google.com/).
-2.  Create a `.env` file in the root directory.
-3.  Add your key: `VITE_API_KEY=your_key_here`.
+Requires Node.js and npm. Run `npm ci` and then `npm run dev`. Open the local address printed by Vite. The dashboard simulates streaming prices; it does not read the Event Hubs or Delta tables created by the backend.
 
----
+For AI explanations, copy `.env.example` to `.env` and set `VITE_API_KEY` to a [Google AI Studio](https://aistudio.google.com/) key. The simulation runs without a key; AI requests return an unavailable message. Vite exposes `VITE_` variables to browser code, so use a restricted demo key rather than a private production credential.
 
-*Note: The dashboard functions as a standalone demo, but backend features require the Gemini API for full interactivity.*
+## Run the producer
+
+Requires the .NET 8 SDK, an Event Hubs namespace and hub, and an Alpha Vantage API key. Configure `backend/RealTimeStockProducer/appsettings.json` for local development, or override values with environment variables such as `STOCK_PRODUCER_Producer__EventHubConnectionString` and `STOCK_PRODUCER_Producer__AlphaVantageApiKey`. Do not commit real credentials. Start it with:
+
+```sh
+dotnet run --project backend/RealTimeStockProducer
+```
+
+The producer sends camel-case JSON fields (`symbol`, `price`, `volume`, `timestamp`) expected by the Databricks schema. The configured target rate is a tick-generation rate; Alpha Vantage limits and network latency can cause synthetic fallback ticks.
+
+## Run the Databricks job
+
+Requires an Azure Databricks cluster with a compatible Azure Event Hubs Spark connector and Delta Lake, plus a `kv-scope` secret named `event-hub-connection-string`. That secret must contain an Event Hub connection string for the hub receiving the producer's messages. Create the `silver` schema and configure the checkpoint location before running `databricks/silver_layer_stock_indicators.py` as a notebook or job. The notebook writes windowed aggregates to `silver.stock_tick_indicators`.
