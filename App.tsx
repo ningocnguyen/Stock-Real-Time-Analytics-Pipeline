@@ -66,8 +66,26 @@ function App() {
                 </div>
             </div>
             <div className="mt-4 flex justify-center gap-4 lg:justify-start text-gray-500">
-                 <Github size={20} className="hover:text-white cursor-pointer"/>
-                 <Linkedin size={20} className="hover:text-white cursor-pointer"/>
+                 <a
+                   href="https://github.com/ningocnguyen"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="GitHub profile"
+                   title="GitHub profile"
+                   className="hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 rounded"
+                 >
+                   <Github size={20} aria-hidden="true" />
+                 </a>
+                 <a
+                   href="https://www.linkedin.com/in/ningocnguyen/"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   aria-label="LinkedIn profile"
+                   title="LinkedIn profile"
+                   className="hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 rounded"
+                 >
+                   <Linkedin size={20} aria-hidden="true" />
+                 </a>
             </div>
         </div>
       </aside>
