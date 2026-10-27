@@ -1,24 +1,25 @@
 # Real-Time Stock Analytics Pipeline
 
-This repository contains a React dashboard, a Vercel API function for Gemini insights, a .NET stock-tick producer, and a Databricks streaming job. The dashboard generates its own demonstration data. It does not read from the producer, Event Hubs, or Databricks tables.
+This repository contains a React dashboard, a Vercel API function for Gemini insights, a .NET stock-tick producer, and a Databricks streaming job. The dashboard generates its own demonstration data.
 
 ## Repository layout
 
-| Path | Purpose |
-| --- | --- |
-| `src/` | React dashboard, UI components, and browser-side API client |
-| `api/ai.ts` | Vercel Function that calls Gemini with a server-side key |
-| `backend/RealTimeStockProducer/` | .NET 8 producer that sends stock ticks to Azure Event Hubs |
-| `databricks/` | PySpark Structured Streaming job that writes Delta aggregates |
-| `index.html`, `vite.config.ts`, `tsconfig.json` | Frontend entry point and build configuration |
+| Path                             | Purpose                                                                                            |
+| -------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `client/`                        | Deployable Vite app: React source, Vercel API function, package manifests, and build configuration |
+| `client/src/`                    | React dashboard, UI components, and browser-side API client                                        |
+| `client/api/ai.ts`               | Vercel Function that calls Gemini with a server-side key                                           |
+| `backend/RealTimeStockProducer/` | .NET 8 producer that sends stock ticks to Azure Event Hubs                                         |
+| `databricks/`                    | PySpark Structured Streaming job that writes Delta aggregates                                      |
 
-Vercel requires the function in the root `api/` directory. The function's request handler stays in that file so its deployed module has no relative runtime imports. The local Vite server exposes the same `/api/ai` route for development.
+The Vercel project's Root Directory must be `client`. Within that project root, Vercel finds the `api/` function and Vite finds `index.html`. The function's request handler stays in one file so its deployed module has no relative runtime imports. The local Vite server exposes the same `/api/ai` route for development.
 
 ## Run the dashboard
 
 Install Node.js, then run:
 
 ```sh
+cd client
 npm ci
 cp .env.example .env
 npm run dev
@@ -28,7 +29,9 @@ Set `GEMINI_API_KEY` in `.env` if you want AI Insight and architecture explanati
 
 ## Deploy the dashboard
 
-Import this repository into Vercel with the repository root as the project root, `npm run build` as the build command, and `dist` as the output directory. Add `GEMINI_API_KEY` to the Vercel project's environment variables for Production and, if needed, Preview. Do not use a `VITE_` prefix for the key. Changing an environment variable requires a new deployment.
+In the existing Vercel project, change **Settings → Build and Deployment → Root Directory** from the repository root to `client` **before pushing this layout change**. Keep `npm run build` as the build command and `dist` as the output directory; both paths are relative to `client`. A deployment triggered before the Root Directory change will fail because the old root no longer contains `package.json`.
+
+Add `GEMINI_API_KEY` to the Vercel project's environment variables for Production and, if needed, Preview. Do not use a `VITE_` prefix for the key. Changing an environment variable requires a new deployment.
 
 The public `/api/ai` endpoint can generate billable Gemini requests. Configure Google AI Studio spend controls and monitor usage before sharing the site widely. This deployment includes the dashboard and API function only.
 

@@ -1,5 +1,5 @@
 {
-  "name": "real-time-stock-analytics-pipeline",
+  "name": "stock-analytics-client",
   "private": true,
   "version": "0.0.0",
   "type": "module",
