@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LayoutDashboard, Code2, TerminalSquare, Github, Linkedin, Cloud, Server } from 'lucide-react';
+import { LayoutDashboard, Code2, TerminalSquare, Github, Linkedin, Cloud } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import PipelineVisualizer from './components/PipelineVisualizer';
 import CodeShowcase from './components/CodeShowcase';
-import { LogEntry } from './types';
+import type { LogEntry } from './types';
 
 function App() {
   const [activeView, setActiveView] = useState<'dashboard' | 'code'>('dashboard');
@@ -55,14 +55,14 @@ function App() {
 
         <div className="p-4 border-t border-gray-800">
             <div className="bg-gray-900 rounded-xl p-4 hidden lg:block border border-gray-800">
-                <p className="text-xs text-gray-500 uppercase font-bold mb-2">System Status</p>
+                <p className="text-xs text-gray-500 uppercase font-bold mb-2">Demo Status</p>
                 <div className="flex items-center gap-2 mb-1">
                     <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span className="text-sm text-gray-300">Event Hubs: Online</span>
+                    <span className="text-sm text-gray-300">Market data: simulated</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                    <span className="text-sm text-gray-300">Databricks: Active</span>
+                    <div className="w-2 h-2 rounded-full bg-gray-500"></div>
+                    <span className="text-sm text-gray-300">Cloud pipeline: separate</span>
                 </div>
             </div>
             <div className="mt-4 flex justify-center gap-4 lg:justify-start text-gray-500">
@@ -100,7 +100,7 @@ function App() {
           </h1>
           <div className="flex items-center gap-3">
             <span className="px-3 py-1 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-full text-xs font-mono">
-                Running: PROD-US-EAST
+                Demo mode
             </span>
           </div>
         </header>
@@ -130,7 +130,7 @@ function App() {
         <div className="h-48 bg-gray-950 border-t border-gray-800 flex flex-col shrink-0">
             <div className="flex items-center gap-2 px-4 py-2 bg-gray-900 border-b border-gray-800">
                 <TerminalSquare size={16} className="text-gray-400"/>
-                <span className="text-xs font-mono text-gray-400 uppercase">System Logs (Live Stream)</span>
+                <span className="text-xs font-mono text-gray-400 uppercase">Demo Stream Logs</span>
             </div>
             <div className="flex-1 overflow-y-auto p-4 font-mono text-xs space-y-1">
                 {logs.length === 0 && <span className="text-gray-600 italic">Waiting for stream to start...</span>}

@@ -3,7 +3,8 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area 
 } from 'recharts';
 import { Play, Pause, TrendingUp, BrainCircuit, ChevronDown } from 'lucide-react';
-import { StockDataPoint, LogEntry, PipelineStage } from '../types';
+import { PipelineStage } from '../types';
+import type { StockDataPoint, LogEntry } from '../types';
 import { getMarketAnalysis } from '../services/geminiService';
 
 interface DashboardProps {
@@ -188,7 +189,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLog }) => {
             <div className="lg:col-span-2 bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-xl flex flex-col relative z-10">
                 <h3 className="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-2">
                     <TrendingUp className="text-blue-500" size={20}/>
-                    Real-Time Price Action (Silver Layer)
+                    Simulated Price Action
                 </h3>
                 <div className="flex-1 min-h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">

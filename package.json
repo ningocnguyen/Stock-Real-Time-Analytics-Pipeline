@@ -1,11 +1,12 @@
 {
-  "name": "azure-stream-analytics-showcase",
+  "name": "real-time-stock-analytics-pipeline",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "build": "npm run typecheck && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
